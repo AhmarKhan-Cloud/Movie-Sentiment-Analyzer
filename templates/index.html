@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IMDB Sentiment - Feature Comparison</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div>
+        <p class="kicker">Cinema Review Lab</p>
+        <h1 class="logo">IMDB Sentiment Analyzer</h1>
+        <p class="tagline">Compare Bag-of-Words, TF-IDF, and Word Embeddings</p>
+      </div>
+      <nav>
+        <a href="/" class="nav-link active">Home</a>
+        <a href="/metrics" class="nav-link">Evaluation Metrics</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    {% if error %}
+    <div class="alert alert-error">
+      {{ error }}
+    </div>
+    {% endif %}
+
+    {% if not models_ready %}
+    <div class="alert alert-warning">
+      <strong>Models not trained yet.</strong>
+      Please run <code>python train.py</code> in your terminal first, then refresh this page.
+    </div>
+    {% endif %}
+
+    <section class="hero-panel">
+      <div class="hero-copy">
+        <p class="section-label">Now Showing</p>
+        <h2>Select a movie, write a review, and analyze its sentiment.</h2>
+        <p>
+          The app runs the same review through three text representation methods
+          and shows how each model interprets the tone.
+        </p>
+      </div>
+      <div class="ticket-stub" aria-hidden="true">
+        <span>ADMIT ONE</span>
+        <strong>Sentiment Screening</strong>
+      </div>
+    </section>
+
+    <section class="method-cards" aria-label="Feature methods">
+      <div class="card card-bow">
+        <div class="card-icon">BOW</div>
+        <h3>Bag-of-Words</h3>
+        <p>Counts raw word occurrences. Simple but effective, while ignoring word order and semantics.</p>
+      </div>
+      <div class="card card-tfidf">
+        <div class="card-icon">TF</div>
+        <h3>TF-IDF</h3>
+        <p>Weights words by rarity across documents, reducing noise from frequent terms.</p>
+      </div>
+      <div class="card card-embed">
+        <div class="card-icon">W2V</div>
+        <h3>Word Embeddings</h3>
+        <p>Uses dense vectors trained with Word2Vec to capture semantic similarity.</p>
+      </div>
+    </section>
+
+    <section class="form-section">
+      <div class="section-heading">
+        <p class="section-label">Review Desk</p>
+        <h2>Movie Sentiment Check</h2>
+      </div>
+      <p class="form-hint">Choose the movie you watched, then write your review for that specific title.</p>
+
+      <form action="/predict" method="POST" id="reviewForm">
+        <label class="field-label" for="movieName">Movie name</label>
+        <select name="movie_name" id="movieName" class="movie-select" required>
+          <option value="" disabled {% if not selected_movie %}selected{% endif %}>Select a movie</option>
+          {% for movie in movie_options %}
+          <option value="{{ movie }}" {% if selected_movie == movie %}selected{% endif %}>{{ movie }}</option>
+          {% endfor %}
+        </select>
+
+        <label class="field-label" for="reviewText">Your review</label>
+        <textarea
+          name="review_text"
+          id="reviewText"
+          class="review-input"
+          rows="7"
+          placeholder="Example: This film was beautifully shot, with memorable performances and a story that stayed with me after the credits."
+          required
+          minlength="10"
+        >{{ review_text or '' }}</textarea>
+
+        <div class="form-footer">
+          <span class="char-count" id="charCount">0 characters</span>
+          <button type="submit" class="btn-predict" {% if not models_ready %}disabled{% endif %}>
+            Analyze Sentiment
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <section class="samples-section">
+      <h3>Try a Sample Review</h3>
+      <div class="sample-buttons">
+        <button class="sample-btn positive" onclick="fillSample('positive')">
+          Positive Sample
+        </button>
+        <button class="sample-btn negative" onclick="fillSample('negative')">
+          Negative Sample
+        </button>
+        <button class="sample-btn neutral" onclick="fillSample('neutral')">
+          Mixed Sample
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Movie Sentiment Analyzer - ML Pipeline | IMDB Dataset | Logistic Regression Classifier</p>
+    </div>
+  </footer>
+
+  <script>
+    const textarea = document.getElementById('reviewText');
+    const charCount = document.getElementById('charCount');
+    textarea.addEventListener('input', () => {
+      charCount.textContent = `${textarea.value.length} characters`;
+    });
+    charCount.textContent = `${textarea.value.length} characters`;
+
+    const samples = {
+      positive: "This film is an absolute masterpiece. The director has crafted something truly special here. Every scene is beautifully shot, the performances are outstanding, and the screenplay is both witty and emotionally resonant. I was completely absorbed from start to finish.",
+      negative: "What a complete waste of time and money. The plot made absolutely no sense from the very beginning to the end. Characters were one-dimensional, the dialogue was awkward, and the special effects looked cheap. I would not recommend this movie.",
+      neutral: "The film had some genuinely interesting moments and the lead actor delivered a solid performance. However, the pacing was uneven and the second act dragged significantly. Overall it is a decent watch, but it falls short of its potential."
+    };
+
+    function fillSample(type) {
+      const movieSelect = document.getElementById('movieName');
+      if (!movieSelect.value) {
+        movieSelect.value = type === 'negative' ? 'Titanic' : type === 'neutral' ? 'Inception' : 'The Shawshank Redemption';
+      }
+      textarea.value = samples[type];
+      charCount.textContent = `${textarea.value.length} characters`;
+      textarea.focus();
+    }
+  </script>
+</body>
+</html>

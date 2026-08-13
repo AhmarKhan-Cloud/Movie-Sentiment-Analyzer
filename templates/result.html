@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prediction Results - IMDB Sentiment</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div>
+        <p class="kicker">Cinema Review Lab</p>
+        <h1 class="logo">IMDB Sentiment Analyzer</h1>
+        <p class="tagline">Compare Bag-of-Words, TF-IDF, and Word Embeddings</p>
+      </div>
+      <nav>
+        <a href="/" class="nav-link">Home</a>
+        <a href="/metrics" class="nav-link">Evaluation Metrics</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <div class="section-heading">
+      <p class="section-label">Screening Report</p>
+      <h2 class="results-heading">Prediction Results</h2>
+    </div>
+
+    <div class="review-display">
+      <div class="movie-context">
+        <span class="movie-label">Movie</span>
+        <strong>{{ movie_name }}</strong>
+      </div>
+      <h3>Original Review</h3>
+      <blockquote class="original-text">{{ original_text }}</blockquote>
+      <details class="cleaned-details">
+        <summary>View preprocessed text</summary>
+        <p class="cleaned-text">{{ cleaned_text }}</p>
+      </details>
+    </div>
+
+    <section class="results-grid">
+      {% for r in results %}
+      <div class="result-card {{ 'card-positive' if r.label == 'Positive' else 'card-negative' }}">
+        <div class="result-method">
+          <span class="method-code">
+            {% if r.method == 'Bag-of-Words' %}BOW{% elif r.method == 'TF-IDF' %}TF{% else %}W2V{% endif %}
+          </span>
+          {{ r.method }}
+        </div>
+
+        <div class="verdict-badge {{ 'badge-positive' if r.label == 'Positive' else 'badge-negative' }}">
+          {{ 'POSITIVE' if r.label == 'Positive' else 'NEGATIVE' }}
+        </div>
+
+        <div class="confidence-section">
+          <span class="confidence-label">Confidence</span>
+          <span class="confidence-value">{{ r.confidence }}%</span>
+          <div class="confidence-bar-bg">
+            <div class="confidence-bar-fill" style="width: {{ r.confidence }}%;"></div>
+          </div>
+        </div>
+
+        <div class="prob-table">
+          <div class="prob-row">
+            <span class="prob-label positive-label">Positive</span>
+            <span class="prob-value">{{ r.probabilities.Positive }}%</span>
+            <div class="prob-bar-bg">
+              <div class="prob-bar-fill positive-fill" style="width: {{ r.probabilities.Positive }}%;"></div>
+            </div>
+          </div>
+          <div class="prob-row">
+            <span class="prob-label negative-label">Negative</span>
+            <span class="prob-value">{{ r.probabilities.Negative }}%</span>
+            <div class="prob-bar-bg">
+              <div class="prob-bar-fill negative-fill" style="width: {{ r.probabilities.Negative }}%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </section>
+
+    {% set pos_count = results | selectattr('label', 'equalto', 'Positive') | list | length %}
+    {% set neg_count = results | selectattr('label', 'equalto', 'Negative') | list | length %}
+    <div class="consensus-box {{ 'consensus-positive' if pos_count >= 2 else 'consensus-negative' }}">
+      {% if pos_count == 3 %}
+        <strong>All three methods agree:</strong> This review is <strong>Positive</strong>.
+      {% elif neg_count == 3 %}
+        <strong>All three methods agree:</strong> This review is <strong>Negative</strong>.
+      {% elif pos_count == 2 %}
+        <strong>Majority vote (2/3):</strong> This review is likely <strong>Positive</strong>.
+      {% else %}
+        <strong>Majority vote (2/3):</strong> This review is likely <strong>Negative</strong>.
+      {% endif %}
+    </div>
+
+    <section class="comparison-section">
+      <h3>How Each Method Works</h3>
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Aspect</th>
+            <th>Bag-of-Words</th>
+            <th>TF-IDF</th>
+            <th>Word Embeddings</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Representation</td>
+            <td>Raw counts</td>
+            <td>Weighted counts</td>
+            <td>Dense vectors</td>
+          </tr>
+          <tr>
+            <td>Vocabulary size</td>
+            <td>10,000 terms</td>
+            <td>10,000 terms</td>
+            <td>100 dimensions</td>
+          </tr>
+          <tr>
+            <td>Word order</td>
+            <td>Ignored</td>
+            <td>Ignored</td>
+            <td>Ignored (averaged)</td>
+          </tr>
+          <tr>
+            <td>Semantics</td>
+            <td>None</td>
+            <td>Partial (IDF)</td>
+            <td>Captured</td>
+          </tr>
+          <tr>
+            <td>Sparsity</td>
+            <td>High</td>
+            <td>High</td>
+            <td>Dense</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <div class="action-buttons">
+      <a href="/" class="btn-secondary">Analyze Another Review</a>
+      <a href="/metrics" class="btn-secondary">See Model Metrics</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Project #11 - ML Pipeline | IMDB Dataset | Logistic Regression Classifier</p>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evaluation Metrics - IMDB Sentiment</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div>
+        <p class="kicker">Cinema Review Lab</p>
+        <h1 class="logo">IMDB Sentiment Analyzer</h1>
+        <p class="tagline">Compare Bag-of-Words, TF-IDF, and Word Embeddings</p>
+      </div>
+      <nav>
+        <a href="/" class="nav-link">Home</a>
+        <a href="/metrics" class="nav-link active">Evaluation Metrics</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container main-content">
+    <div class="section-heading">
+      <p class="section-label">Model Archive</p>
+      <h2 class="results-heading">Evaluation Results</h2>
+    </div>
+    <p class="form-hint">
+      Results from training on 40,000 IMDB reviews and testing on 10,000 held-out samples.
+      The same Logistic Regression classifier is used for all three representations.
+    </p>
+
+    {% if not plots['metrics_comparison.png'] %}
+    <div class="alert alert-warning">
+      No evaluation plots found. Run <code>python train.py</code> to generate them.
+    </div>
+    {% else %}
+
+    <section class="plot-section">
+      <h3>Accuracy / Precision / Recall / F1 / ROC-AUC</h3>
+      <img src="{{ url_for('static', filename='metrics_comparison.png') }}"
+           alt="Metric comparison bar chart" class="plot-img" />
+    </section>
+
+    {% if plots['roc_curves.png'] %}
+    <section class="plot-section">
+      <h3>ROC Curves</h3>
+      <img src="{{ url_for('static', filename='roc_curves.png') }}"
+           alt="ROC curves" class="plot-img plot-img-medium" />
+    </section>
+    {% endif %}
+
+    {% if plots['confusion_matrices.png'] %}
+    <section class="plot-section">
+      <h3>Confusion Matrices</h3>
+      <img src="{{ url_for('static', filename='confusion_matrices.png') }}"
+           alt="Confusion matrices" class="plot-img" />
+    </section>
+    {% endif %}
+
+    {% if plots['training_time.png'] %}
+    <section class="plot-section">
+      <h3>Classifier Training Time</h3>
+      <img src="{{ url_for('static', filename='training_time.png') }}"
+           alt="Training time comparison" class="plot-img plot-img-medium" />
+    </section>
+    {% endif %}
+
+    {% endif %}
+
+    <div class="action-buttons">
+      <a href="/" class="btn-secondary">Back to Predictor</a>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Project #11 - ML Pipeline | IMDB Dataset | Logistic Regression Classifier</p>
+    </div>
+  </footer>
+</body>
+</html>
