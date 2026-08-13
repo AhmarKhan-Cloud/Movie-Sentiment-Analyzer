@@ -100,6 +100,54 @@ Open browser: **http://127.0.0.1:5000**
 
 ---
 
+## Deploy on Streamlit Community Cloud
+
+This project also includes a Streamlit entrypoint:
+
+```bash
+streamlit run streamlit_app.py
+```
+
+Deployment flow:
+
+```text
+Kaggle IMDb Dataset
+        ↓
+ML Models
+        ↓
+predict.py
+        ↓
+Streamlit
+        ↓
+Public URL
+```
+
+Before deploying, make sure these folders/files are committed to GitHub:
+
+- `streamlit_app.py`
+- `requirements.txt`
+- `.streamlit/config.toml`
+- `models/`
+- `static/*.png`
+- `nltk_data/`
+- `predict.py`, `preprocessing.py`, and `paths.py`
+
+On Streamlit Community Cloud:
+
+1. Push this project to a GitHub repository.
+2. Open `https://share.streamlit.io`.
+3. Choose **Create app**.
+4. Select your GitHub repository and branch.
+5. Set the main file path to `streamlit_app.py`.
+6. In **Advanced settings**, choose Python `3.10`.
+7. Deploy and wait for the public `streamlit.app` URL.
+
+The Streamlit app loads the saved models from `models/` and calls `predict.py`
+for inference, so the Kaggle dataset itself is not required at runtime unless
+you plan to retrain models in the cloud.
+
+---
+
 ## Evaluation Metrics
 
 All metrics computed on a stratified 20% held-out test set (10,000 samples).
